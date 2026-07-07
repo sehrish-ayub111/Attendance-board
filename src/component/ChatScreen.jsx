@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../AppContext'
 
-export default function ChatScreen({ chatId, title, onBack }) {
+export default function ChatScreen({ chatId, title, photo, onBack }) {
   const { currentUser, messages, sendMessage, markChatRead } = useApp()
   const [text, setText] = useState('')
   const bottomRef = useRef(null)
@@ -28,24 +28,29 @@ export default function ChatScreen({ chatId, title, onBack }) {
 
   return (
     <div className="wa-screen">
-    
+      
       <div className="wa-header">
         <button className="wa-back-btn" onClick={onBack}>←</button>
-        <div className="wa-avatar">{title?.[0]?.toUpperCase()}</div>
+        <div className="wa-avatar">
+          {photo ? (
+            <img src={photo} alt={title} className="wa-avatar-img" />
+          ) : (
+            title?.[0]?.toUpperCase()
+          )}
+        </div>
         <span className="wa-title">{title}</span>
       </div>
 
 
       <div className="wa-body">
         {thread.length === 0 ? (
-          <p className="wa-empty">empty!</p>
+          <p className="wa-empty">No message yet — say Hi!</p>
         ) : (
           thread.map((m) => {
             const mine = m.senderId === currentUser.id
             return (
               <div key={m.id} className={`wa-msg-row ${mine ? 'wa-mine' : 'wa-theirs'}`}>
                 <div className={`wa-bubble ${mine ? 'wa-bubble-mine' : 'wa-bubble-theirs'}`}>
-                  {/*<span className="wa-sender">{m.senderName}</span>*/}
                   <p className="wa-text">{m.text}</p>
                 </div>
               </div>

@@ -17,13 +17,14 @@ const TABS = [
 ]
 
 export default function UserDashboard() {
-  const { currentUser, messages, profileTrigger } = useApp()
+  const { currentUser, messages, profileTrigger, users } = useApp()
   const [activeTab, setActiveTab] = useState('mark')
   const [chatOpen, setChatOpen] = useState(false)
 
+  const adminUser = users.find((u) => u.role === 'admin')
+
 
   const profileBaseline = useRef(profileTrigger)
-
   useEffect(() => {
     if (profileTrigger > profileBaseline.current) {
       setActiveTab('profile')
@@ -40,6 +41,7 @@ export default function UserDashboard() {
       setChatOpen(true)
     } else {
       setActiveTab(key)
+      setChatOpen(false)
     }
   }
 
@@ -49,7 +51,7 @@ export default function UserDashboard() {
         {TABS.map((t) => (
           <button
             key={t.key}
-            className={`tab ${activeTab === t.key && t.key !== 'chat' ? 'tab-active' : ''}`}
+            className={`tab ${(chatOpen ? t.key === 'chat' : activeTab === t.key) ? 'tab-active' : ''}`}
             onClick={() => handleTabClick(t.key)}
           >
             {t.label}
@@ -60,23 +62,24 @@ export default function UserDashboard() {
         ))}
       </nav>
 
-      <div className="tab-content">
-        {activeTab === 'profile' && <Profile />}
-        {activeTab === 'mark' && <AttendenceForm />}
-        {activeTab === 'myAttendance' && <AttendenceList mode="own" />}
-        {activeTab === 'applyLeave' && <LeaveForm />}
-        {activeTab === 'myLeaves' && <LeaveList mode="own" />}
-      </div>
-
       {chatOpen ? (
         <ChatScreen
           chatId={currentUser.id}
           title="Admin"
+          photo={adminUser?.photo}
           onBack={() => setChatOpen(false)}
         />
       ) : (
-        <ChatBot />
+        <div className="tab-content">
+          {activeTab === 'profile' && <Profile />}
+          {activeTab === 'mark' && <AttendenceForm />}
+          {activeTab === 'myAttendance' && <AttendenceList mode="own" />}
+          {activeTab === 'applyLeave' && <LeaveForm />}
+          {activeTab === 'myLeaves' && <LeaveList mode="own" />}
+        </div>
       )}
+
+      {!chatOpen && <ChatBot />}
     </div>
   )
 }

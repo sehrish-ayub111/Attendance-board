@@ -122,8 +122,16 @@ function closeReason(){
     return new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
   }
 
-  function formatDuration(startTs, endTs) {
-    const end = endTs || Date.now()
+  function formatDuration(startTs, endTs, dateStr) {
+    let end = endTs
+    if (!end) {
+      // Open record — agar aaj ka hai to abhi tak live count, warna
+      // us din ki raat 12 baje (midnight) tak hi ginte hain, hamesha
+      // ke liye badhta nahi rahega.
+      const endOfDay = new Date(dateStr)
+      endOfDay.setHours(23, 59, 59, 999)
+      end = Math.min(Date.now(), endOfDay.getTime())
+    }
     const totalSeconds = Math.floor((end - startTs) / 1000)
     const h = Math.floor(totalSeconds / 3600)
     const m = Math.floor((totalSeconds % 3600) / 60)
@@ -222,20 +230,21 @@ function closeReason(){
             </thead>
             <tbody>
               {rows.map((r) => {
-                const working = !r.timeOutTs
+                const working = !r.timeOutTs || r.autoClosed
                 return (
                   <tr key={r.id}>
                     <td>{r.userName}</td>
                     <td className="mono">{r.date}</td>
                     <td className="mono">{formatClock(r.timeInTs)}</td>
                     <td className="mono">{working ? '--' : formatClock(r.timeOutTs)}</td>
-                    <td className="mono">{formatDuration(r.timeInTs, r.timeOutTs)}</td>
+                    <td className="mono">{formatDuration(r.timeInTs, r.timeOutTs, r.date)}</td>
                     <td>
-                      {r.late ? (
-                        <span className="status-pill status-rejected">Late</span>
-                      ) : (
-                        <span className="muted">—</span>
-                      )}
+                      <div className="status-pill-group">
+                        {r.late && <span className="status-pill status-rejected">Late</span>}
+                        {r.earlyLeave && <span className="status-pill status-pending">Early Leave</span>}
+                        {r.overtime && <span className="status-pill status-approved">Overtime</span>}
+                        {!r.late && !r.earlyLeave && !r.overtime && <span className="muted">—</span>}
+                      </div>
                     </td>
                     <td>
                       {r.editNote ? (

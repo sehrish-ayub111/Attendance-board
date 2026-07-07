@@ -10,17 +10,16 @@ import Profile from './Profile'
 const TABS = [
   { key: 'attendance', label: 'All Attendance' },
   { key: 'leaves', label: 'All Leave Requests' },
-  { key: 'addEmployee', label: 'Add Employee' },
+  { key: 'addEmployee', label: 'Employee' },
   { key: 'chat', label: 'Chat' },
 ]
 
 export default function AdminDashboard() {
   const { pendingLeavesTrigger, profileTrigger, users, messages } = useApp()
   const [activeTab, setActiveTab] = useState('attendance')
-  const [chatTarget, setChatTarget] = useState(null) 
+  const [chatTarget, setChatTarget] = useState(null) // {id, name, photo}
   const [chatSearch, setChatSearch] = useState('')
 
-  
   const pendingBaseline = useRef(pendingLeavesTrigger)
   const profileBaseline = useRef(profileTrigger)
 
@@ -53,8 +52,11 @@ export default function AdminDashboard() {
         {TABS.map((t) => (
           <button
             key={t.key}
-            className={`tab ${activeTab === t.key ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab(t.key)}
+            className={`tab ${(chatTarget ? t.key === 'chat' : activeTab === t.key) ? 'tab-active' : ''}`}
+            onClick={() => {
+              setActiveTab(t.key)
+              setChatTarget(null)
+            }}
           >
             {t.label}
             {t.key === 'chat' && totalUnread > 0 && (
@@ -64,75 +66,81 @@ export default function AdminDashboard() {
         ))}
       </nav>
 
-      <div className="tab-content">
-        {activeTab === 'profile' && <Profile />}
-        {activeTab === 'attendance' && <AttendenceList mode="admin" />}
-        {activeTab === 'leaves' && (
-          <LeaveList mode="admin" pendingTrigger={pendingLeavesTrigger} />
-        )}
-        {activeTab === 'addEmployee' && <AddEmployee />}
-        {activeTab === 'chat' && (
-          <div className="card">
-            <h2 className="card-title">Chat</h2>
-
-            {employees.length > 0 && (
-              <div className="wa-search-box">
-                <input
-                  type="text"
-                  className="wa-search-input"
-                  placeholder="Employee search..."
-                  value={chatSearch}
-                  onChange={(e) => setChatSearch(e.target.value)}
-                />
-              </div>
-            )}
-
-            {employees.length === 0 ? (
-              <p className="empty-state">empty</p>
-            ) : visibleEmployees.length === 0 ? (
-              <p className="empty-state">empty.</p>
-            ) : (
-              <div className="wa-list">
-                {visibleEmployees.map((u) => {
-                  const unread = unreadFor(u.id)
-                  const lastMsg = messages
-                    .filter((m) => m.chatId === u.id)
-                    .sort((a, b) => b.timestamp - a.timestamp)[0]
-                  return (
-                    <button
-                      key={u.id}
-                      className="wa-list-item"
-                      onClick={() => setChatTarget({ id: u.id, name: u.name })}
-                    >
-                      <div className="wa-list-avatar">{u.name[0].toUpperCase()}</div>
-                      <div className="wa-list-info">
-                        <span className="wa-list-name">{u.name}</span>
-                        <span className="wa-list-preview">
-                          {lastMsg ? lastMsg.text : 'No messages yet'}
-                        </span>
-                      </div>
-                      {unread > 0 && (
-                        <span className="wa-unread-badge">{unread}</span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-   
       {chatTarget ? (
         <ChatScreen
           chatId={chatTarget.id}
           title={chatTarget.name}
+          photo={chatTarget.photo}
           onBack={() => setChatTarget(null)}
         />
       ) : (
-        <AdminChatBot />
+        <div className="tab-content">
+          {activeTab === 'profile' && <Profile />}
+          {activeTab === 'attendance' && <AttendenceList mode="admin" />}
+          {activeTab === 'leaves' && (
+            <LeaveList mode="admin" pendingTrigger={pendingLeavesTrigger} />
+          )}
+          {activeTab === 'addEmployee' && <AddEmployee />}
+          {activeTab === 'chat' && (
+            <div className="card">
+              <h2 className="card-title">Chat</h2>
+
+              {employees.length > 0 && (
+                <div className="wa-search-box">
+                  <input
+                    type="text"
+                    className="wa-search-input"
+                    placeholder="Employee search..."
+                    value={chatSearch}
+                    onChange={(e) => setChatSearch(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {employees.length === 0 ? (
+                <p className="empty-state">empty</p>
+              ) : visibleEmployees.length === 0 ? (
+                <p className="empty-state">empty.</p>
+              ) : (
+                <div className="wa-list">
+                  {visibleEmployees.map((u) => {
+                    const unread = unreadFor(u.id)
+                    const lastMsg = messages
+                      .filter((m) => m.chatId === u.id)
+                      .sort((a, b) => b.timestamp - a.timestamp)[0]
+                    return (
+                      <button
+                        key={u.id}
+                        className="wa-list-item"
+                        onClick={() => setChatTarget({ id: u.id, name: u.name, photo: u.photo })}
+                      >
+                        <div className="wa-list-avatar">
+                          {u.photo ? (
+                            <img src={u.photo} alt={u.name} className="wa-list-avatar-img" />
+                          ) : (
+                            u.name[0].toUpperCase()
+                          )}
+                        </div>
+                        <div className="wa-list-info">
+                          <span className="wa-list-name">{u.name}</span>
+                          <span className="wa-list-preview">
+                            {lastMsg ? lastMsg.text : 'No messages yet'}
+                          </span>
+                        </div>
+                        {unread > 0 && (
+                          <span className="wa-unread-badge">{unread}</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
+
+      {!chatTarget && <AdminChatBot />}
     </div>
   )
 }
