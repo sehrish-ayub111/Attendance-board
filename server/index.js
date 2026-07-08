@@ -1,22 +1,23 @@
 import express from 'express'
 import cors from 'cors'
-import crypto from 'crpto'
+import crypto from 'crypto'
 import { pool } from './db.js'
 
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '15mb' }))
-
 const PORT = 4000
 
 function newId() {
     return crypto.randomUUID()
 }
-app.post('/app/login', async (requestAnimationFrame, res) => {
+
+
+app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body
         const [rows] = await pool.query(
-            'SELECT *FROM user WHERE LOWER (TRIM(username)) = LOWER(TRIM(?)) AND password =? LIMIT 1 ',
+            'SELECT * FROM users WHERE LOWER(TRIM(username)) = LOWER(TRIM(?)) AND password = ? LIMIT 1',
             [username, password]
         )
         res.json({ user: rows[0] || null })
@@ -26,9 +27,10 @@ app.post('/app/login', async (requestAnimationFrame, res) => {
     }
 })
 
+//USERS 
 app.get('/api/users', async (req, res) => {
     try {
-        const [rows] = awaitpool.query('SELECT*FRPM users')
+        const [rows] = await pool.query('SELECT * FROM users')
         res.json(rows)
     } catch (err) {
         res.status(500).json({ error: err.message })
@@ -43,12 +45,13 @@ app.post('/api/users', async (req, res) => {
             'INSERT INTO users (id, username, password, name, email, role) VALUES (?, ?, ?, ?, ?, ?)',
             [id, username, password, name, email || null, role || 'user']
         )
-        const [rows] = await pool.query('SELECT*FROM users WHERE id =? ', [id])
-        res.json(row[0])
+        const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id])
+        res.json(rows[0])
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
 })
+
 app.delete('/api/users/:id', async (req, res) => {
     try {
         await pool.query('DELETE FROM users WHERE id = ?', [req.params.id])
@@ -74,10 +77,13 @@ app.patch('/api/users/:id', async (req, res) => {
     }
 })
 
+
+
 app.get('/api/attendance', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT *FROM attendance')
+        const [rows] = await pool.query('SELECT * FROM attendance')
         const mapped = rows.map((r) => ({ ...r, date: r.data }))
+        res.json(mapped)
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
@@ -110,6 +116,7 @@ app.patch('/api/attendance/:id/clockout', async (req, res) => {
     }
 })
 
+
 app.patch('/api/attendance/:id', async (req, res) => {
     try {
         const fields = { ...req.body }
@@ -130,73 +137,77 @@ app.patch('/api/attendance/:id', async (req, res) => {
     }
 })
 
-app.get('/api/leaves', async(req, res) => {
-    try{
-        const[rows] = await pool.query('SELECT *FROM leaves')
+//  LEAVES
+app.get('/api/leaves', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM leaves')
         res.json(rows)
     } catch (err) {
-        res.status(500).json({error:err.message})
+        res.status(500).json({ error: err.message })
     }
 })
 
-app.post('/api/leaves', async(req, res) =>{
-    try{
-        const{userId, userName, startDate, endDate, days, type , reason} = req.body
+app.post('/api/leaves', async (req, res) => {
+    try {
+        const { userId, userName, startDate, endDate, days, type, reason } = req.body
         const id = newId()
         await pool.query(
-       'INSERT INTO leaves (id, userId, userName, startDate, endDate, days, type, reason, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, userId, userName, startDate, endDate, days, type, reason, 'pending']
-    )
-    res.json({ id })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
+            'INSERT INTO leaves (id, userId, userName, startDate, endDate, days, type, reason, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, userId, userName, startDate, endDate, days, type, reason, 'pending']
+        )
+        res.json({ id })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
 })
 
-app.patch('/api/leave/:id/status', async (req, res)=> {
-    try{
-        const {status} = req.body
+app.patch('/api/leaves/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body
         await pool.query('UPDATE leaves SET status = ? WHERE id = ?', [status, req.params.id])
-    res.json({ ok: true })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.get('/api/messages', async (req, res) =>{
-    try{
-        const[rows] = await pool.query('SELECT * FROM message')
-        res.json(rows)
-    } catch(err){
-        res.status(500).json({error:err.message})
+        res.json({ ok: true })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
     }
 })
-app.post('/api/messages', async(req, res) =>{
-    try{
-        const {chatId, senderId, senderName, text, timestamp, isAdmin} = req.body
+
+//  MESSAGES 
+app.get('/api/messages', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM messages')
+        res.json(rows)
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+})
+
+app.post('/api/messages', async (req, res) => {
+    try {
+        const { chatId, senderId, senderName, text, timestamp, isAdmin } = req.body
         const id = newId()
         await pool.query(
-         'INSERT INTO messages (id, chatId, senderId, senderName, text, timestamp, readByAdmin, readByEmployee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, chatId, senderId, senderName, text, timestamp, isAdmin, !isAdmin]
-    )
-    res.json({ id })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-app.patch('/api/messages/mark-read', async (req, res) => {
-    try{
-        const{chatId, field} =req.body
-        if(!['readyByAdmin', 'readByEmployee'].includes(field)){
-            return res.status(400).json({error: 'Invaild field'})
-        }
-        await pool.query('UPDATE messages SET \ `${field}\` = TRUE WHERE chatId = ? ' [chatId])
-        res.json({ok: true})
-    } catch(err){
-        res.status(500).json({error: err.message})
+            'INSERT INTO messages (id, chatId, senderId, senderName, text, timestamp, readByAdmin, readByEmployee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, chatId, senderId, senderName, text, timestamp, isAdmin, !isAdmin]
+        )
+        res.json({ id })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
     }
 })
 
-app.listen (PORT, () =>{
+app.patch('/api/messages/mark-read', async (req, res) => {
+    try {
+        const { chatId, field } = req.body 
+        if (!['readByAdmin', 'readByEmployee'].includes(field)) {
+            return res.status(400).json({ error: 'Invalid field' })
+        }
+        await pool.query(`UPDATE messages SET \`${field}\` = TRUE WHERE chatId = ?`, [chatId])
+        res.json({ ok: true })
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+})
+
+app.listen(PORT, () => {
     console.log(`API server running at http://localhost:${PORT}`)
 })

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
-    "firebase": "^12.15.0",
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "mysql2": "^3.11.5",
+    "firebase": "^12.15.0",
+    "mysql2": "^3.22.5",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
