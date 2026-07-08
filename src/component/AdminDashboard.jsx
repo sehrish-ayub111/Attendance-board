@@ -6,6 +6,8 @@ import AddEmployee from './Addemployee'
 import ChatScreen from './ChatScreen'
 import AdminChatBot from './AdminChatBot'
 import Profile from './Profile'
+import StatCards from './StatCards'
+import EmployeeProfileModal from './EmployeeProfileModal'
 
 const TABS = [
   { key: 'attendance', label: 'All Attendance' },
@@ -15,10 +17,11 @@ const TABS = [
 ]
 
 export default function AdminDashboard() {
-  const { pendingLeavesTrigger, profileTrigger, users, messages } = useApp()
+  const { pendingLeavesTrigger, profileTrigger, users, messages, attendanceRecords, leaveRecords, todayStr } = useApp()
   const [activeTab, setActiveTab] = useState('attendance')
   const [chatTarget, setChatTarget] = useState(null) // {id, name, photo}
   const [chatSearch, setChatSearch] = useState('')
+  const [profileModalUser, setProfileModalUser] = useState(null)
 
   const pendingBaseline = useRef(pendingLeavesTrigger)
   const profileBaseline = useRef(profileTrigger)
@@ -46,6 +49,21 @@ export default function AdminDashboard() {
 
   const totalUnread = employees.reduce((sum, u) => sum + unreadFor(u.id), 0)
 
+  // ─── Quick-stats ─────────────────────────────────────────
+  const today = todayStr()
+  const todayRecords = attendanceRecords.filter((r) => r.date === today)
+  const presentIds = new Set(todayRecords.map((r) => r.userId))
+  const presentCount = presentIds.size
+  const absentCount = Math.max(employees.length - presentCount, 0)
+  const pendingLeavesCount = leaveRecords.filter((l) => l.status === 'pending').length
+
+  const statCards = [
+    { label: 'Present Today', value: presentCount, icon: '✅', color: '#00967d' },
+    { label: 'Absent Today', value: absentCount, icon: '🚫', color: '#c0524a' },
+    { label: 'Pending Leaves', value: pendingLeavesCount, icon: '📝', color: '#d4a017' },
+    { label: 'Total Employees', value: employees.length, icon: '👥', color: '#4a90d9' },
+  ]
+
   return (
     <div className="dashboard">
       <nav className="tabs">
@@ -66,12 +84,18 @@ export default function AdminDashboard() {
         ))}
       </nav>
 
+      {!chatTarget && <StatCards cards={statCards} />}
+
       {chatTarget ? (
         <ChatScreen
           chatId={chatTarget.id}
           title={chatTarget.name}
           photo={chatTarget.photo}
           onBack={() => setChatTarget(null)}
+          onTitleClick={() => {
+            const emp = employees.find((u) => u.id === chatTarget.id)
+            if (emp) setProfileModalUser(emp)
+          }}
         />
       ) : (
         <div className="tab-content">
@@ -141,6 +165,13 @@ export default function AdminDashboard() {
       )}
 
       {!chatTarget && <AdminChatBot />}
+
+      {profileModalUser && (
+        <EmployeeProfileModal
+          user={profileModalUser}
+          onClose={() => setProfileModalUser(null)}
+        />
+      )}
     </div>
   )
 }

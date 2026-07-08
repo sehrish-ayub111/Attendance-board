@@ -7,6 +7,7 @@ import LeaveList from './LeaveList'
 import ChatScreen from './ChatScreen'
 import ChatBot from './ChatBot'
 import Profile from './Profile'
+import StatCards from './StatCards'
 
 const TABS = [
   { key: 'mark', label: 'Mark Attendance' },
@@ -17,7 +18,7 @@ const TABS = [
 ]
 
 export default function UserDashboard() {
-  const { currentUser, messages, profileTrigger, users } = useApp()
+  const { currentUser, messages, profileTrigger, users, attendanceRecords, leaveRecords, todayStr } = useApp()
   const [activeTab, setActiveTab] = useState('mark')
   const [chatOpen, setChatOpen] = useState(false)
 
@@ -25,6 +26,7 @@ export default function UserDashboard() {
 
 
   const profileBaseline = useRef(profileTrigger)
+
   useEffect(() => {
     if (profileTrigger > profileBaseline.current) {
       setActiveTab('profile')
@@ -35,6 +37,25 @@ export default function UserDashboard() {
   const unread = messages.filter(
     (m) => m.chatId === currentUser.id && !m.readByEmployee
   ).length
+
+ 
+  const monthKey = todayStr().slice(0, 7)
+  const myAttendance = attendanceRecords.filter((r) => r.userId === currentUser.id)
+  const myMonthDays = new Set(
+    myAttendance.filter((r) => r.date && r.date.startsWith(monthKey)).map((r) => r.date)
+  ).size
+  const isClockedInToday = myAttendance.some((r) => r.date === todayStr() && !r.timeOutTs)
+
+  const myLeaves = leaveRecords.filter((l) => l.userId === currentUser.id)
+  const myPendingLeaves = myLeaves.filter((l) => l.status === 'pending').length
+  const myApprovedLeaves = myLeaves.filter((l) => l.status === 'approved').length
+
+  const statCards = [
+    { label: "Today's Status", value: isClockedInToday ? 'Clocked In' : 'Not In', icon: '🕒', color: isClockedInToday ? '#00967d' : '#5c6b62' },
+    { label: 'Days This Month', value: myMonthDays, icon: '📅', color: '#4a90d9' },
+    { label: 'Pending Leaves', value: myPendingLeaves, icon: '📝', color: '#d4a017' },
+    { label: 'Approved Leaves', value: myApprovedLeaves, icon: '✅', color: '#00967d' },
+  ]
 
   function handleTabClick(key) {
     if (key === 'chat') {
@@ -61,6 +82,8 @@ export default function UserDashboard() {
           </button>
         ))}
       </nav>
+
+      {!chatOpen && <StatCards cards={statCards} />}
 
       {chatOpen ? (
         <ChatScreen

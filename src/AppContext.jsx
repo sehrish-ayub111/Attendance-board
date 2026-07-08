@@ -35,6 +35,15 @@ export function AppProvider({ children }) {
   const [messages, setMessages] = useState([])
   const [pendingLeavesTrigger, setPendingLeavesTrigger] = useState(0)
   const [profileTrigger, setProfileTrigger] = useState(0)
+  const [toasts, setToasts] = useState([])
+
+  function showToast(message, type = 'success') {
+    const id = Date.now() + Math.random()
+    setToasts((t) => [...t, { id, message, type }])
+    setTimeout(() => {
+      setToasts((t) => t.filter((x) => x.id !== id))
+    }, 3200)
+  }
 
   const currentUserRef = useRef(currentUser)
   currentUserRef.current = currentUser
@@ -61,7 +70,7 @@ export function AppProvider({ children }) {
       setMessages(m)
       setUsersLoaded(true)
 
-     
+
       if (currentUserRef.current) {
         const updated = u.find((x) => x.id === currentUserRef.current.id)
         if (updated) setCurrentUser(updated)
@@ -77,7 +86,7 @@ export function AppProvider({ children }) {
     return () => clearInterval(interval)
   }, [])
 
-
+  
   useEffect(() => {
     const today = todayStr()
     const stale = attendanceRecords.filter((r) => !r.timeOutTs && r.date && r.date !== today)
@@ -115,12 +124,14 @@ export function AppProvider({ children }) {
     const password = generatePassword()
     const newUser = await api.post('/users', { username, password, role: 'user', name, email })
     await refreshAll()
+    showToast('Employee added successfully')
     return newUser
   }
 
   async function deleteEmployee(userId) {
     await api.del(`/users/${userId}`)
     await refreshAll()
+    showToast('Employee removed')
   }
 
   async function clockIn() {
@@ -133,6 +144,7 @@ export function AppProvider({ children }) {
       late: isLate(now),
     })
     await refreshAll()
+    showToast('Clocked in successfully')
     return id
   }
 
@@ -147,6 +159,7 @@ export function AppProvider({ children }) {
       overtime: now > closingTime.getTime(),
     })
     await refreshAll()
+    showToast('Clocked out successfully')
   }
 
   async function updateAttendance(recordId, updates) {
@@ -161,6 +174,7 @@ export function AppProvider({ children }) {
       startDate, endDate, days, type, reason,
     })
     await refreshAll()
+    showToast('Leave request submitted')
 
     try {
       await fetch('https://api.web3forms.com/submit', {
@@ -185,16 +199,25 @@ export function AppProvider({ children }) {
   async function updateLeaveStatus(id, status) {
     await api.patch(`/leaves/${id}/status`, { status })
     await refreshAll()
+    showToast(`Leave ${status}`, status === 'rejected' ? 'error' : 'success')
   }
 
-  //  PROFILE 
+  //  PROFILE
   async function updateProfile(updates) {
     await api.patch(`/users/${currentUser.id}`, updates)
     setCurrentUser((prev) => ({ ...prev, ...updates }))
     await refreshAll()
+    showToast('Profile updated')
   }
 
-  // CHAT 
+  
+  async function updateUser(userId, updates) {
+    await api.patch(`/users/${userId}`, updates)
+    await refreshAll()
+    showToast('Employee details updated')
+  }
+
+  //  CHAT 
   async function sendMessage({ chatId, text }) {
     const isAdmin = currentUser.role === 'admin'
     await api.post('/messages', {
@@ -226,7 +249,8 @@ export function AppProvider({ children }) {
     pendingLeavesTrigger, goToPendingLeaves,
     profileTrigger, goToProfile,
     messages, sendMessage, markChatRead,
-    updateProfile,
+    updateProfile, updateUser,
+    toasts, showToast,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

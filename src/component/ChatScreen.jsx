@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../AppContext'
 
-export default function ChatScreen({ chatId, title, photo, onBack }) {
+export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick }) {
   const { currentUser, messages, sendMessage, markChatRead } = useApp()
   const [text, setText] = useState('')
   const bottomRef = useRef(null)
@@ -28,23 +28,38 @@ export default function ChatScreen({ chatId, title, photo, onBack }) {
 
   return (
     <div className="wa-screen">
-      
+      {/* Header */}
       <div className="wa-header">
         <button className="wa-back-btn" onClick={onBack}>←</button>
-        <div className="wa-avatar">
-          {photo ? (
-            <img src={photo} alt={title} className="wa-avatar-img" />
-          ) : (
-            title?.[0]?.toUpperCase()
-          )}
-        </div>
-        <span className="wa-title">{title}</span>
+        {onTitleClick ? (
+          <button className="wa-header-identity wa-header-identity-clickable" onClick={onTitleClick}>
+            <div className="wa-avatar">
+              {photo ? (
+                <img src={photo} alt={title} className="wa-avatar-img" />
+              ) : (
+                title?.[0]?.toUpperCase()
+              )}
+            </div>
+            <span className="wa-title">{title}</span>
+          </button>
+        ) : (
+          <div className="wa-header-identity">
+            <div className="wa-avatar">
+              {photo ? (
+                <img src={photo} alt={title} className="wa-avatar-img" />
+              ) : (
+                title?.[0]?.toUpperCase()
+              )}
+            </div>
+            <span className="wa-title">{title}</span>
+          </div>
+        )}
       </div>
 
-
+      {/* Messages */}
       <div className="wa-body">
         {thread.length === 0 ? (
-          <p className="wa-empty">No message yet — say Hi!</p>
+          <p className="wa-empty">Koi message nahi — pehla message bhejein!</p>
         ) : (
           thread.map((m) => {
             const mine = m.senderId === currentUser.id
@@ -60,6 +75,7 @@ export default function ChatScreen({ chatId, title, photo, onBack }) {
         <div ref={bottomRef} />
       </div>
 
+      {/* Input */}
       <form className="wa-footer" onSubmit={handleSend}>
         <input
           className="wa-input"

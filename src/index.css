@@ -341,6 +341,12 @@ input:focus, select:focus, textarea:focus {
 
 .card-title { margin-bottom: 18px; font-size: 1.1rem; }
 
+.table-scroll {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -350,16 +356,31 @@ input:focus, select:focus, textarea:focus {
 .data-table th {
   text-align: left;
   color: var(--ink-soft);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 8px 10px;
-  border-bottom: 2px solid var(--border);
+  letter-spacing: 0.04em;
+  padding: 12px 14px;
+  background: #f3f6f5;
+  border-bottom: 1px solid var(--border);
 }
 
 .data-table td {
-  padding: 12px 10px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border);
+  transition: background 0.12s ease;
+}
+
+.data-table tbody tr:nth-child(even) td {
+  background: #fafbfa;
+}
+
+.data-table tbody tr:hover td {
+  background: #eaf5f2;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .actions { display: flex; gap: 6px }
@@ -909,6 +930,26 @@ input:focus, select:focus, textarea:focus {
   background: #006d5b;
   color: #fff;
   flex-shrink: 0;
+}
+
+.wa-header-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wa-header-identity-clickable {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: #fff;
+  transition: background 0.15s ease;
+}
+
+.wa-header-identity-clickable:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .wa-back-btn {
@@ -1491,4 +1532,169 @@ input:focus, select:focus, textarea:focus {
 .bot-input-row button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ─── Toast notifications ──────────────────────────────────── */
+.toast-host {
+  position: fixed;
+  top: 50px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1e2b23;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: toast-slide-in 0.25s ease, toast-fade-out 0.3s ease 2.9s forwards;
+  max-width: 340px;
+}
+
+.toast-success { background: #006d5b; }
+.toast-error { background: #c0524a; }
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toast-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(-6px); }
+}
+
+/* ─── Dashboard quick-stats cards ───────────────────────────── */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.stat-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-card-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.stat-card-label {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+/* ─── Employee profile modal (admin view) ──────────────────── */
+.emp-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.emp-profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.emp-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emp-profile-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.emp-profile-jobtitle {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.emp-profile-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.emp-profile-section {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emp-profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.emp-profile-label {
+  color: var(--ink-soft);
 }
