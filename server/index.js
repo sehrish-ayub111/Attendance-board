@@ -6,7 +6,7 @@ import { pool } from './db.js'
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '15mb' }))
-const PORT = 4000
+const PORT = process.env.PORT || 4000
 
 function newId() {
     return crypto.randomUUID()

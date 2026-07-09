@@ -28,7 +28,7 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
 
   return (
     <div className="wa-screen">
-      {/* Header */}
+      
       <div className="wa-header">
         <button className="wa-back-btn" onClick={onBack}>←</button>
         {onTitleClick ? (
@@ -56,7 +56,7 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
         )}
       </div>
 
-      {/* Messages */}
+
       <div className="wa-body">
         {thread.length === 0 ? (
           <p className="wa-empty">Koi message nahi — pehla message bhejein!</p>
@@ -75,7 +75,7 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+   
       <form className="wa-footer" onSubmit={handleSend}>
         <input
           className="wa-input"

@@ -19,7 +19,7 @@ const TABS = [
 export default function AdminDashboard() {
   const { pendingLeavesTrigger, profileTrigger, users, messages, attendanceRecords, leaveRecords, todayStr } = useApp()
   const [activeTab, setActiveTab] = useState('attendance')
-  const [chatTarget, setChatTarget] = useState(null) // {id, name, photo}
+  const [chatTarget, setChatTarget] = useState(null) 
   const [chatSearch, setChatSearch] = useState('')
   const [profileModalUser, setProfileModalUser] = useState(null)
 
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
   const totalUnread = employees.reduce((sum, u) => sum + unreadFor(u.id), 0)
 
-  // ─── Quick-stats ─────────────────────────────────────────
+
   const today = todayStr()
   const todayRecords = attendanceRecords.filter((r) => r.date === today)
   const presentIds = new Set(todayRecords.map((r) => r.userId))

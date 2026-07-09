@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../AppContext'
 import ChatScreen from './ChatScreen'
 
-// Avatar color — naam ke pehle letter se consistent color
+
 function avatarColor(name) {
   const colors = [
     '#2f6b4f', '#e0883b', '#4a90d9', '#7b5ea7',
@@ -24,7 +24,6 @@ export default function AdminChat() {
       .includes(search.toLowerCase())
   )
 
-  // Agar employee select ho gaya to ChatScreen dikhao
   if (selectedId) {
     const selectedEmployee = employees.find((u) => u.id === selectedId)
     return (
@@ -73,7 +72,7 @@ export default function AdminChat() {
                 className="wa-contact"
                 onClick={() => setSelectedId(u.id)}
               >
-                {/* Avatar with color */}
+               
                 <div
                   className="wa-avatar"
                   style={{ background: avatarColor(name) }}
