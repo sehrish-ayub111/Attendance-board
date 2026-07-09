@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise'
 
 export const pool = mysql.createPool({
-    host: '/api/',
+    host: 'localhost',
     user: 'root',
     password: 'attendance@12',
     database: 'attendance_db',
