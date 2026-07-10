@@ -4,7 +4,7 @@ import AttendenceList from './AttendenceList'
 import LeaveList from './LeaveList'
 import AddEmployee from './Addemployee'
 import ChatScreen from './ChatScreen'
-import AdminChatBot from './AdminChatBot'
+import AdminChatBot from "./Adminchatbot"
 import Profile from './Profile'
 import StatCards from './StatCards'
 import EmployeeProfileModal from './EmployeeProfileModal'
