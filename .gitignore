@@ -24,11 +24,4 @@ dist-ssr
 *.sw?
 *.exe
 release/
-<<<<<<< HEAD
-node_modules/
 dist/
-.env
-*.log
-=======
-
->>>>>>> old-hrm-project
