@@ -4,12 +4,19 @@ import AttendenceList from './AttendenceList'
 import LeaveList from './LeaveList'
 import AddEmployee from './Addemployee'
 import ChatScreen from './ChatScreen'
+<<<<<<< HEAD
 import AdminChatBot from './AdminChatBot'
+=======
+import AdminChatBot from "./Adminchatbot"
+>>>>>>> old-hrm-project
 import Profile from './Profile'
 import StatCards from './StatCards'
 import EmployeeProfileModal from './EmployeeProfileModal'
 
+<<<<<<< HEAD
 // Top navigation tabs shown in the admin dashboard
+=======
+>>>>>>> old-hrm-project
 const TABS = [
   { key: 'attendance', label: 'All Attendance' },
   { key: 'leaves', label: 'All Leave Requests' },
@@ -18,6 +25,7 @@ const TABS = [
 ]
 
 export default function AdminDashboard() {
+<<<<<<< HEAD
   // Pull shared app data and "trigger" counters from global context.
   // pendingLeavesTrigger/profileTrigger increment elsewhere in the app to
   // signal "something happened, auto-switch the tab" (e.g. new leave request submitted)
@@ -34,12 +42,26 @@ export default function AdminDashboard() {
   const profileBaseline = useRef(profileTrigger)
 
   // If a new leave request comes in (trigger increases), auto-switch to the "leaves" tab
+=======
+  const { pendingLeavesTrigger, profileTrigger, users, messages, attendanceRecords, leaveRecords, todayStr } = useApp()
+  const [activeTab, setActiveTab] = useState('attendance')
+  const [chatTarget, setChatTarget] = useState(null) 
+  const [chatSearch, setChatSearch] = useState('')
+  const [profileModalUser, setProfileModalUser] = useState(null)
+
+  const pendingBaseline = useRef(pendingLeavesTrigger)
+  const profileBaseline = useRef(profileTrigger)
+
+>>>>>>> old-hrm-project
   useEffect(() => {
     if (pendingLeavesTrigger > pendingBaseline.current) setActiveTab('leaves')
   }, [pendingLeavesTrigger])
 
+<<<<<<< HEAD
   // If profile trigger increases (e.g. someone requests to view a profile), 
   // switch to the profile tab and close any open chat
+=======
+>>>>>>> old-hrm-project
   useEffect(() => {
     if (profileTrigger > profileBaseline.current) {
       setActiveTab('profile')
@@ -47,19 +69,28 @@ export default function AdminDashboard() {
     }
   }, [profileTrigger])
 
+<<<<<<< HEAD
   // Only regular employees (not admins) are relevant here
   const employees = users.filter((u) => u.role === 'user')
 
   // Employees filtered by the chat search box text
+=======
+  const employees = users.filter((u) => u.role === 'user')
+
+>>>>>>> old-hrm-project
   const visibleEmployees = employees.filter((u) =>
     u.name.toLowerCase().includes(chatSearch.trim().toLowerCase())
   )
 
+<<<<<<< HEAD
   // Counts unread messages (not yet read by admin) for a given employee
+=======
+>>>>>>> old-hrm-project
   function unreadFor(empId) {
     return messages.filter((m) => m.chatId === empId && !m.readByAdmin).length
   }
 
+<<<<<<< HEAD
   // Total unread messages across all employees, shown as a badge on the Chat tab
   const totalUnread = employees.reduce((sum, u) => sum + unreadFor(u.id), 0)
 
@@ -72,6 +103,18 @@ export default function AdminDashboard() {
   const pendingLeavesCount = leaveRecords.filter((l) => l.status === 'pending').length
 
   // Data for the 4 stat cards shown at the top of the dashboard
+=======
+  const totalUnread = employees.reduce((sum, u) => sum + unreadFor(u.id), 0)
+
+
+  const today = todayStr()
+  const todayRecords = attendanceRecords.filter((r) => r.date === today)
+  const presentIds = new Set(todayRecords.map((r) => r.userId))
+  const presentCount = presentIds.size
+  const absentCount = Math.max(employees.length - presentCount, 0)
+  const pendingLeavesCount = leaveRecords.filter((l) => l.status === 'pending').length
+
+>>>>>>> old-hrm-project
   const statCards = [
     { label: 'Present Today', value: presentCount, icon: '✅', color: '#00967d' },
     { label: 'Absent Today', value: absentCount, icon: '🚫', color: '#c0524a' },
@@ -81,11 +124,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="dashboard">
+<<<<<<< HEAD
       {/* Top tab navigation bar */}
+=======
+>>>>>>> old-hrm-project
       <nav className="tabs">
         {TABS.map((t) => (
           <button
             key={t.key}
+<<<<<<< HEAD
             // Highlight "chat" tab if a chat is open, otherwise highlight based on activeTab
             className={`tab ${(chatTarget ? t.key === 'chat' : activeTab === t.key) ? 'tab-active' : ''}`}
             onClick={() => {
@@ -95,6 +142,15 @@ export default function AdminDashboard() {
           >
             {t.label}
             {/* Show unread message count badge only on the Chat tab */}
+=======
+            className={`tab ${(chatTarget ? t.key === 'chat' : activeTab === t.key) ? 'tab-active' : ''}`}
+            onClick={() => {
+              setActiveTab(t.key)
+              setChatTarget(null)
+            }}
+          >
+            {t.label}
+>>>>>>> old-hrm-project
             {t.key === 'chat' && totalUnread > 0 && (
               <span className="wa-tab-badge">{totalUnread}</span>
             )}
@@ -102,24 +158,38 @@ export default function AdminDashboard() {
         ))}
       </nav>
 
+<<<<<<< HEAD
       {/* Hide the stat cards while a 1-on-1 chat is open, to give more space */}
       {!chatTarget && <StatCards cards={statCards} />}
 
       {chatTarget ? (
         // If an employee chat is open, show the full chat screen instead of tab content
+=======
+      {!chatTarget && <StatCards cards={statCards} />}
+
+      {chatTarget ? (
+>>>>>>> old-hrm-project
         <ChatScreen
           chatId={chatTarget.id}
           title={chatTarget.name}
           photo={chatTarget.photo}
+<<<<<<< HEAD
           onBack={() => setChatTarget(null)} // close chat, return to list
           onTitleClick={() => {
             // Clicking the chat header opens that employee's profile modal
+=======
+          onBack={() => setChatTarget(null)}
+          onTitleClick={() => {
+>>>>>>> old-hrm-project
             const emp = employees.find((u) => u.id === chatTarget.id)
             if (emp) setProfileModalUser(emp)
           }}
         />
       ) : (
+<<<<<<< HEAD
         // Otherwise, render whichever tab is currently active
+=======
+>>>>>>> old-hrm-project
         <div className="tab-content">
           {activeTab === 'profile' && <Profile />}
           {activeTab === 'attendance' && <AttendenceList mode="admin" />}
@@ -131,7 +201,10 @@ export default function AdminDashboard() {
             <div className="card">
               <h2 className="card-title">Chat</h2>
 
+<<<<<<< HEAD
               {/* Only show the search box if there's at least one employee */}
+=======
+>>>>>>> old-hrm-project
               {employees.length > 0 && (
                 <div className="wa-search-box">
                   <input
@@ -144,17 +217,26 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+<<<<<<< HEAD
               {/* Empty states: no employees at all vs. no results matching search */}
+=======
+>>>>>>> old-hrm-project
               {employees.length === 0 ? (
                 <p className="empty-state">empty</p>
               ) : visibleEmployees.length === 0 ? (
                 <p className="empty-state">empty.</p>
               ) : (
+<<<<<<< HEAD
                 // List of employees available to chat with
                 <div className="wa-list">
                   {visibleEmployees.map((u) => {
                     const unread = unreadFor(u.id)
                     // Get the most recent message with this employee (for preview text)
+=======
+                <div className="wa-list">
+                  {visibleEmployees.map((u) => {
+                    const unread = unreadFor(u.id)
+>>>>>>> old-hrm-project
                     const lastMsg = messages
                       .filter((m) => m.chatId === u.id)
                       .sort((a, b) => b.timestamp - a.timestamp)[0]
@@ -162,10 +244,16 @@ export default function AdminDashboard() {
                       <button
                         key={u.id}
                         className="wa-list-item"
+<<<<<<< HEAD
                         onClick={() => setChatTarget({ id: u.id, name: u.name, photo: u.photo })} // open this employee's chat
                       >
                         <div className="wa-list-avatar">
                           {/* Show photo if available, otherwise fall back to first letter of name */}
+=======
+                        onClick={() => setChatTarget({ id: u.id, name: u.name, photo: u.photo })}
+                      >
+                        <div className="wa-list-avatar">
+>>>>>>> old-hrm-project
                           {u.photo ? (
                             <img src={u.photo} alt={u.name} className="wa-list-avatar-img" />
                           ) : (
@@ -178,7 +266,10 @@ export default function AdminDashboard() {
                             {lastMsg ? lastMsg.text : 'No messages yet'}
                           </span>
                         </div>
+<<<<<<< HEAD
                         {/* Unread badge, shown only if there are unread messages */}
+=======
+>>>>>>> old-hrm-project
                         {unread > 0 && (
                           <span className="wa-unread-badge">{unread}</span>
                         )}
@@ -192,10 +283,15 @@ export default function AdminDashboard() {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Floating AI chatbot, hidden while an individual chat is open */}
       {!chatTarget && <AdminChatBot />}
 
       {/* Employee profile modal, shown when triggered from the chat header */}
+=======
+      {!chatTarget && <AdminChatBot />}
+
+>>>>>>> old-hrm-project
       {profileModalUser && (
         <EmployeeProfileModal
           user={profileModalUser}
@@ -204,4 +300,8 @@ export default function AdminDashboard() {
       )}
     </div>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> old-hrm-project

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ⚠️ API key hardcoded directly in frontend source — see note below
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
@@ -11,15 +12,28 @@ export async function askGemini(context, question) {
   // Debug log to verify the key is loaded correctly (doesn't print the full key)
   console.log('KEY LENGTH:', GEMINI_API_KEY.length, 'STARTS WITH:', GEMINI_API_KEY.slice(0, 5))
 
+=======
+const GEMINI_API_KEY = 'AQ.Ab8RN6J_h_X7Hhr4csE5neBkSyByzQxtR1OQFNsgU-PP2IPeSA'
+
+const GEMINI_MODEL = 'gemini-2.5-flash'
+
+export async function askGemini(context, question) {
+  console.log('KEY LENGTH:', GEMINI_API_KEY.length, 'STARTS WITH:', GEMINI_API_KEY.slice(0, 5))
+>>>>>>> old-hrm-project
   if (!GEMINI_API_KEY || GEMINI_API_KEY === '') {
     throw new Error('API key not set. Add your key in the geminiClient.js file.')
   }
 
+<<<<<<< HEAD
   // Gemini's generateContent endpoint, with the API key passed as a query param
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
 
   // Full prompt: the data context + the user's question + instructions on how
   // to answer (stay on-topic, don't guess, match user's language/style)
+=======
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
+
+>>>>>>> old-hrm-project
   const prompt = `${context}
 
 User's question: "${question}"
@@ -31,7 +45,11 @@ Based on the data given above, give a direct, short, and correct answer (in the 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
+<<<<<<< HEAD
       generationConfig: { temperature: 0.3, maxOutputTokens: 500 }, // low temperature = more consistent/factual answers
+=======
+      generationConfig: { temperature: 0.3, maxOutputTokens: 500 },
+>>>>>>> old-hrm-project
     }),
   })
 
@@ -41,7 +59,10 @@ Based on the data given above, give a direct, short, and correct answer (in the 
   }
 
   const data = await res.json()
+<<<<<<< HEAD
   // Navigate Gemini's response structure to extract the actual generated text
+=======
+>>>>>>> old-hrm-project
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
   if (!text) {

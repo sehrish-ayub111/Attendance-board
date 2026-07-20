@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+<<<<<<< HEAD
     "bcrypt": "^6.0.0",
+=======
+>>>>>>> old-hrm-project
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "firebase": "^12.15.0",
