@@ -1,0 +1,212 @@
+import { useState, useRef, useEffect } from 'react'
+import { useApp } from '../AppContext'
+import { askGemini } from '../geminiClient'
+
+// Predefined quick-reply questions shown as clickable buttons in the employee chatbot
+const QUICK_REPLIES = [
+  "What's my attendance today?",
+  "Tell me my leaves status",
+  "How do I apply for leave?",
+  "How many times was I late this month?",
+]
+
+// Converts a timestamp into a readable time string, or a fallback message if missing
+function formatTime(ts) {
+  if (!ts) return 'Not recorded'
+  return new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Builds the full text prompt sent to Gemini, containing rules, app navigation info,
+// and this specific employee's own attendance/leave data (unlike AdminChatBot which
+// includes ALL employees, this only includes the logged-in user's own records)
+function buildContext({ currentUser, attendanceRecords, leaveRecords, todayStr }) {
+  const today = todayStr()
+
+  // This employee's attendance records, newest first
+  const myAttendance = attendanceRecords
+    .filter((r) => r.userId === currentUser.id)
+    .sort((a, b) => b.timeInTs - a.timeInTs)
+
+  // This employee's leave requests
+  const myLeaves = leaveRecords.filter((l) => l.userId === currentUser.id)
+
+  // Today's attendance record (if clocked in today)
+  const todayRecord = myAttendance.find((r) => r.date === today)
+
+  // Total number of times this employee was ever marked late
+  const lateCount = myAttendance.filter((r) => r.late).length
+
+  // Filter attendance down to just the current month, and count late days within it
+  const currentMonthKey = today.slice(0, 7) // "YYYY-MM"
+  const thisMonthAttendance = myAttendance.filter((r) => r.date?.startsWith(currentMonthKey))
+  const thisMonthLate = thisMonthAttendance.filter((r) => r.late).length
+
+  // Split leave requests by status for the summary
+  const pendingLeaves = myLeaves.filter((l) => l.status === 'pending')
+  const approvedLeaves = myLeaves.filter((l) => l.status === 'approved')
+  const rejectedLeaves = myLeaves.filter((l) => l.status === 'rejected')
+
+  // Full text listing of every attendance record, for the AI to reference in detail
+  const allAttendanceText = myAttendance
+    .map((r) => `  - ${r.date}: Clock In ${formatTime(r.timeInTs)}, Clock Out ${formatTime(r.timeOutTs)}${r.late ? ' ⚠ LATE' : ''}`)
+    .join('\n')
+
+  // Full text listing of every leave request, for the AI to reference in detail
+  const allLeavesText = myLeaves
+    .map((l) => `  - From ${l.startDate} to ${l.endDate} (${l.days} day/s), Type: ${l.type}, Status: ${l.status.toUpperCase()}, Reason: ${l.reason || '—'}`)
+    .join('\n')
+
+  // Final prompt: instructions/rules for the AI + app navigation guide + computed summary + raw data
+  return `You are a smart, helpful AI attendance assistant for employee "${currentUser.name}".
+Today's date: ${today}.
+
+IMPORTANT RULES:
+1. You have FULL ACCESS to all of this employee's data. NEVER say "I don't have access" or "I can't provide this information" or "information is not available". Always give a direct answer.
+2. If the employee asks about "today", "this week", "this month" — calculate it from the data below.
+3. If the employee asks "who", "what", "where", "how", "name", "they" — answer from the data below.
+4. Always be friendly and give useful, specific answers with actual numbers and dates.
+5. If there is no data for something, say "No records found" and suggest what they should do.
+
+APP NAVIGATION GUIDE:
+- Clock In/Out → "Mark Attendance" tab
+- Apply for leave → "Apply Leave" tab (select date, days, type, reason, submit)
+- View leave status → "My Leaves" tab
+- Chat with admin → "Chat" tab
+- Edit profile → click avatar circle in top navbar
+
+EMPLOYEE SUMMARY:
+- Name: ${currentUser.name}
+- Total attendance records: ${myAttendance.length}
+- Total late count (all time): ${lateCount}
+- This month (${currentMonthKey}) attendance: ${thisMonthAttendance.length} day(s), Late: ${thisMonthLate} time(s)
+- Today's status: ${todayRecord ? `Clocked in at ${formatTime(todayRecord.timeInTs)}, Clocked out at ${formatTime(todayRecord.timeOutTs)}${todayRecord.late ? ' (LATE)' : ''}` : 'Not clocked in yet today'}
+- Total leave requests: ${myLeaves.length} (Pending: ${pendingLeaves.length}, Approved: ${approvedLeaves.length}, Rejected: ${rejectedLeaves.length})
+
+ALL ATTENDANCE RECORDS (newest first):
+${allAttendanceText || '  No attendance records found.'}
+
+ALL LEAVE REQUESTS:
+${allLeavesText || '  No leave requests found.'}`
+}
+
+export default function ChatBot() {
+  // Access global app data/functions
+  const app = useApp()
+  const { currentUser } = app
+
+  const [open, setOpen] = useState(false) // whether the chatbot panel is open
+  const [input, setInput] = useState('') // current text in the input box
+  const [loading, setLoading] = useState(false) // true while waiting for AI response
+
+  // Chat message history, starts with a personalized welcome message
+  const [thread, setThread] = useState([
+    { from: 'bot', text: `Hi ${currentUser.name}! I'm your AI attendance assistant. Ask me anything about your attendance, leaves, or how to use the app!` },
+  ])
+
+  // Ref to the bottom of the chat, used to auto-scroll to the newest message
+  const bottomRef = useRef(null)
+
+  // Auto-scroll whenever a new message arrives, the panel opens, or loading state changes
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [thread, open, loading])
+
+  // Sends a message (typed or from quick-replies) and fetches the AI's reply
+  async function send(text) {
+    if (!text.trim() || loading) return // ignore empty messages or while already loading
+
+    setThread((t) => [...t, { from: 'user', text }]) // show user's message immediately
+    setInput('') // clear input box
+    setLoading(true) // show typing indicator
+
+    try {
+      const context = buildContext(app) // build the employee's personalized data context
+      const reply = await askGemini(context, text) // ask the AI
+      setThread((t) => [...t, { from: 'bot', text: reply }]) // show the AI's reply
+    } catch (err) {
+      // Show a friendly error message in the chat if the API call fails
+      setThread((t) => [...t, { from: 'bot', text: `Sorry, something went wrong. Please try again. (${err.message})` }])
+    }
+    setLoading(false)
+  }
+
+  // Handles form submission (Enter key or Send button click)
+  function handleSubmit(e) {
+    e.preventDefault()
+    send(input)
+  }
+
+  return (
+    <>
+      {/* Floating button to toggle the chatbot panel open/closed */}
+      <button className="bot-fab" onClick={() => setOpen((o) => !o)} aria-label="Chatbot">
+        {open ? (
+          // "X" close icon when panel is open
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+        ) : (
+          // Robot face icon when panel is closed
+          <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+            <defs>
+              <radialGradient id="botEyeGlow" cx="35%" cy="35%" r="70%">
+                <stop offset="0%" stopColor="#eafcff" />
+                <stop offset="45%" stopColor="#4fd8ff" />
+                <stop offset="100%" stopColor="#0ea5e9" />
+              </radialGradient>
+            </defs>
+            <line x1="32" y1="6" x2="32" y2="12" stroke="#e8edf1" strokeWidth="2.4" strokeLinecap="round" />
+            <circle cx="32" cy="5" r="2.6" fill="#4fd8ff" />
+            <rect x="6" y="26" width="5" height="14" rx="2.5" fill="#c9d2d8" />
+            <rect x="53" y="26" width="5" height="14" rx="2.5" fill="#c9d2d8" />
+            <rect x="11" y="13" width="42" height="38" rx="16" fill="#f3f6f8" />
+            <rect x="11" y="13" width="42" height="38" rx="16" fill="url(#botEyeGlow)" opacity="0.06" />
+            <rect x="17" y="22" width="30" height="19" rx="8" fill="#16324a" />
+            <circle cx="26.5" cy="31.5" r="4.4" fill="url(#botEyeGlow)" />
+            <circle cx="37.5" cy="31.5" r="4.4" fill="url(#botEyeGlow)" />
+            <path d="M26 46c2.2 2 9.8 2 12 0" stroke="#c9d2d8" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        )}
+      </button>
+
+      {/* Chat panel, only rendered when open */}
+      {open && (
+        <div className="bot-panel">
+          <div className="bot-header">
+            <span>AI Attendance Assistant</span>
+          </div>
+
+          {/* Message list */}
+          <div className="bot-body">
+            {thread.map((m, i) => (
+              <div key={i} className={`bot-msg bot-msg-${m.from}`}>{m.text}</div>
+            ))}
+            {/* Typing indicator dots while waiting for AI response */}
+            {loading && (
+              <div className="bot-msg bot-msg-bot bot-msg-typing">
+                <span className="bot-typing-dot" />
+                <span className="bot-typing-dot" />
+                <span className="bot-typing-dot" />
+              </div>
+            )}
+            {/* Anchor for auto-scroll */}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Quick-reply buttons for common employee questions */}
+          <div className="bot-quick-replies">
+            {QUICK_REPLIES.map((q) => (
+              <button key={q} type="button" className="bot-quick-btn" onClick={() => send(q)} disabled={loading}>{q}</button>
+            ))}
+          </div>
+
+          {/* Text input form for custom questions */}
+          <form className="bot-input-row" onSubmit={handleSubmit}>
+            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask me anything..." disabled={loading} />
+            <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? '...' : 'Send'}</button>
+          </form>
+        </div>
+      )}
+    </>
+  )
+}
