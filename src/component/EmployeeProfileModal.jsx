@@ -2,34 +2,24 @@ import { useState } from 'react'
 import { useApp } from '../AppContext'
 import Modal from './Modal'
 
-<<<<<<< HEAD
 // Formats a timestamp as "HH:MM" for display, or "--" if not recorded
-=======
->>>>>>> old-hrm-project
 function formatClock(ts) {
   if (!ts) return '--'
   return new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
-<<<<<<< HEAD
 // Color palette used for avatar backgrounds when no profile photo is set
-=======
->>>>>>> old-hrm-project
 const AVATAR_COLORS = [
   '#2f6b4f', '#e0883b', '#4a90d9', '#7b5ea7',
   '#c0524a', '#3c8b5d', '#d4a017', '#5c8a8a',
 ]
 
-<<<<<<< HEAD
 // Picks a consistent color for a given name (same name always gets the same color)
-=======
->>>>>>> old-hrm-project
 function avatarColor(name) {
   const index = (name?.charCodeAt(0) || 0) % AVATAR_COLORS.length
   return AVATAR_COLORS[index]
 }
 
-<<<<<<< HEAD
 // Modal showing a single employee's full profile: photo/name, today's attendance status,
 // leave request summary, and an inline edit mode for updating their details
 export default function EmployeeProfileModal({ user, onClose }) {
@@ -44,87 +34,50 @@ export default function EmployeeProfileModal({ user, onClose }) {
   const today = todayStr()
 
   // Get this employee's most recent attendance record for today (if any)
-=======
-export default function EmployeeProfileModal({ user, onClose }) {
-  const { attendanceRecords, leaveRecords, todayStr, updateUser } = useApp()
-
-  const [editMode, setEditMode] = useState(false)
-  const [name, setName] = useState(user.name || '')
-  const [jobTitle, setJobTitle] = useState(user.jobTitle || '')
-  const [email, setEmail] = useState(user.email || '')
-  const [saving, setSaving] = useState(false)
-
-  const today = todayStr()
->>>>>>> old-hrm-project
   const todayRecord = attendanceRecords
     .filter((r) => r.userId === user.id && r.date === today)
     .sort((a, b) => b.timeInTs - a.timeInTs)[0]
 
-<<<<<<< HEAD
   // Currently clocked in = has a record today with no time-out yet
   const clockedIn = todayRecord && !todayRecord.timeOutTs
 
   // This employee's leave requests, broken down by status for the summary section
-=======
-  const clockedIn = todayRecord && !todayRecord.timeOutTs
-
->>>>>>> old-hrm-project
   const myLeaves = leaveRecords.filter((l) => l.userId === user.id)
   const pendingLeaves = myLeaves.filter((l) => l.status === 'pending').length
   const approvedLeaves = myLeaves.filter((l) => l.status === 'approved').length
   const rejectedLeaves = myLeaves.filter((l) => l.status === 'rejected').length
 
-<<<<<<< HEAD
   // Save edited profile fields (name/jobTitle/email), then exit edit mode
-=======
->>>>>>> old-hrm-project
   async function handleSave() {
     setSaving(true)
     try {
       await updateUser(user.id, { name: name.trim(), jobTitle: jobTitle.trim(), email: email.trim() })
       setEditMode(false)
     } finally {
-<<<<<<< HEAD
       setSaving(false) // always reset saving state, even if the update fails
-=======
-      setSaving(false)
->>>>>>> old-hrm-project
     }
   }
 
   return (
     <Modal title="Employee Profile" onClose={onClose}>
-<<<<<<< HEAD
       {/* Top section: avatar + name/job title (or editable fields when in edit mode) */}
-=======
->>>>>>> old-hrm-project
       <div className="emp-profile-header">
         <div className="emp-profile-avatar" style={{ background: avatarColor(user.name) }}>
           {user.photo ? (
             <img src={user.photo} alt={user.name} className="emp-profile-avatar-img" />
           ) : (
-<<<<<<< HEAD
             user.name?.charAt(0).toUpperCase() // fallback: first letter of name
-=======
-            user.name?.charAt(0).toUpperCase()
->>>>>>> old-hrm-project
           )}
         </div>
 
         {!editMode ? (
-<<<<<<< HEAD
           // Read-only view: just show name and job title as text
-=======
->>>>>>> old-hrm-project
           <div>
             <div className="emp-profile-name">{user.name}</div>
             <div className="emp-profile-jobtitle">{user.jobTitle || 'No job title set'}</div>
           </div>
         ) : (
-<<<<<<< HEAD
           // Edit mode: show input fields for name, job title, and email
-=======
->>>>>>> old-hrm-project
           <div className="emp-profile-edit-fields">
             <label>
               Full Name
@@ -142,15 +95,10 @@ export default function EmployeeProfileModal({ user, onClose }) {
         )}
       </div>
 
-<<<<<<< HEAD
       {/* Attendance & leave summary sections — hidden while in edit mode to keep focus on the form */}
       {!editMode && (
         <>
           {/* Today's attendance status */}
-=======
-      {!editMode && (
-        <>
->>>>>>> old-hrm-project
           <div className="emp-profile-section">
             <div className="emp-profile-row">
               <span className="emp-profile-label">Status Today</span>
@@ -172,10 +120,7 @@ export default function EmployeeProfileModal({ user, onClose }) {
             </div>
           </div>
 
-<<<<<<< HEAD
           {/* Leave request counts by status */}
-=======
->>>>>>> old-hrm-project
           <div className="emp-profile-section">
             <div className="emp-profile-row">
               <span className="emp-profile-label">Leaves — Pending</span>
@@ -193,10 +138,7 @@ export default function EmployeeProfileModal({ user, onClose }) {
         </>
       )}
 
-<<<<<<< HEAD
       {/* Footer actions: switch between "Edit" button and "Cancel/Save" buttons depending on mode */}
-=======
->>>>>>> old-hrm-project
       <div className="modal-actions">
         {editMode ? (
           <>
@@ -215,8 +157,4 @@ export default function EmployeeProfileModal({ user, onClose }) {
       </div>
     </Modal>
   )
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> old-hrm-project

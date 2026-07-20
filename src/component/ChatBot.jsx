@@ -2,10 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../AppContext'
 import { askGemini } from '../geminiClient'
 
-<<<<<<< HEAD
 // Predefined quick-reply questions shown as clickable buttons in the employee chatbot
-=======
->>>>>>> old-hrm-project
 const QUICK_REPLIES = [
   "What's my attendance today?",
   "Tell me my leaves status",
@@ -13,16 +10,12 @@ const QUICK_REPLIES = [
   "How many times was I late this month?",
 ]
 
-<<<<<<< HEAD
 // Converts a timestamp into a readable time string, or a fallback message if missing
-=======
->>>>>>> old-hrm-project
 function formatTime(ts) {
   if (!ts) return 'Not recorded'
   return new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
-<<<<<<< HEAD
 // Builds the full text prompt sent to Gemini, containing rules, app navigation info,
 // and this specific employee's own attendance/leave data (unlike AdminChatBot which
 // includes ALL employees, this only includes the logged-in user's own records)
@@ -30,15 +23,10 @@ function buildContext({ currentUser, attendanceRecords, leaveRecords, todayStr }
   const today = todayStr()
 
   // This employee's attendance records, newest first
-=======
-function buildContext({ currentUser, attendanceRecords, leaveRecords, todayStr }) {
-  const today = todayStr()
->>>>>>> old-hrm-project
   const myAttendance = attendanceRecords
     .filter((r) => r.userId === currentUser.id)
     .sort((a, b) => b.timeInTs - a.timeInTs)
 
-<<<<<<< HEAD
   // This employee's leave requests
   const myLeaves = leaveRecords.filter((l) => l.userId === currentUser.id)
 
@@ -54,40 +42,21 @@ function buildContext({ currentUser, attendanceRecords, leaveRecords, todayStr }
   const thisMonthLate = thisMonthAttendance.filter((r) => r.late).length
 
   // Split leave requests by status for the summary
-=======
-  const myLeaves = leaveRecords.filter((l) => l.userId === currentUser.id)
-
-  const todayRecord = myAttendance.find((r) => r.date === today)
-  const lateCount = myAttendance.filter((r) => r.late).length
-  const currentMonthKey = today.slice(0, 7)
-  const thisMonthAttendance = myAttendance.filter((r) => r.date?.startsWith(currentMonthKey))
-  const thisMonthLate = thisMonthAttendance.filter((r) => r.late).length
-
->>>>>>> old-hrm-project
   const pendingLeaves = myLeaves.filter((l) => l.status === 'pending')
   const approvedLeaves = myLeaves.filter((l) => l.status === 'approved')
   const rejectedLeaves = myLeaves.filter((l) => l.status === 'rejected')
 
-<<<<<<< HEAD
   // Full text listing of every attendance record, for the AI to reference in detail
-=======
->>>>>>> old-hrm-project
   const allAttendanceText = myAttendance
     .map((r) => `  - ${r.date}: Clock In ${formatTime(r.timeInTs)}, Clock Out ${formatTime(r.timeOutTs)}${r.late ? ' ⚠ LATE' : ''}`)
     .join('\n')
 
-<<<<<<< HEAD
   // Full text listing of every leave request, for the AI to reference in detail
-=======
->>>>>>> old-hrm-project
   const allLeavesText = myLeaves
     .map((l) => `  - From ${l.startDate} to ${l.endDate} (${l.days} day/s), Type: ${l.type}, Status: ${l.status.toUpperCase()}, Reason: ${l.reason || '—'}`)
     .join('\n')
 
-<<<<<<< HEAD
   // Final prompt: instructions/rules for the AI + app navigation guide + computed summary + raw data
-=======
->>>>>>> old-hrm-project
   return `You are a smart, helpful AI attendance assistant for employee "${currentUser.name}".
 Today's date: ${today}.
 
@@ -121,7 +90,6 @@ ${allLeavesText || '  No leave requests found.'}`
 }
 
 export default function ChatBot() {
-<<<<<<< HEAD
   // Access global app data/functions
   const app = useApp()
   const { currentUser } = app
@@ -139,23 +107,10 @@ export default function ChatBot() {
   const bottomRef = useRef(null)
 
   // Auto-scroll whenever a new message arrives, the panel opens, or loading state changes
-=======
-  const app = useApp()
-  const { currentUser } = app
-  const [open, setOpen] = useState(false)
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [thread, setThread] = useState([
-    { from: 'bot', text: `Hi ${currentUser.name}! I'm your AI attendance assistant. Ask me anything about your attendance, leaves, or how to use the app!` },
-  ])
-  const bottomRef = useRef(null)
-
->>>>>>> old-hrm-project
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [thread, open, loading])
 
-<<<<<<< HEAD
   // Sends a message (typed or from quick-replies) and fetches the AI's reply
   async function send(text) {
     if (!text.trim() || loading) return // ignore empty messages or while already loading
@@ -170,28 +125,12 @@ export default function ChatBot() {
       setThread((t) => [...t, { from: 'bot', text: reply }]) // show the AI's reply
     } catch (err) {
       // Show a friendly error message in the chat if the API call fails
-=======
-  async function send(text) {
-    if (!text.trim() || loading) return
-    setThread((t) => [...t, { from: 'user', text }])
-    setInput('')
-    setLoading(true)
-
-    try {
-      const context = buildContext(app)
-      const reply = await askGemini(context, text)
-      setThread((t) => [...t, { from: 'bot', text: reply }])
-    } catch (err) {
->>>>>>> old-hrm-project
       setThread((t) => [...t, { from: 'bot', text: `Sorry, something went wrong. Please try again. (${err.message})` }])
     }
     setLoading(false)
   }
 
-<<<<<<< HEAD
   // Handles form submission (Enter key or Send button click)
-=======
->>>>>>> old-hrm-project
   function handleSubmit(e) {
     e.preventDefault()
     send(input)
@@ -199,23 +138,15 @@ export default function ChatBot() {
 
   return (
     <>
-<<<<<<< HEAD
       {/* Floating button to toggle the chatbot panel open/closed */}
       <button className="bot-fab" onClick={() => setOpen((o) => !o)} aria-label="Chatbot">
         {open ? (
           // "X" close icon when panel is open
-=======
-      <button className="bot-fab" onClick={() => setOpen((o) => !o)} aria-label="Chatbot">
-        {open ? (
->>>>>>> old-hrm-project
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
           </svg>
         ) : (
-<<<<<<< HEAD
           // Robot face icon when panel is closed
-=======
->>>>>>> old-hrm-project
           <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
             <defs>
               <radialGradient id="botEyeGlow" cx="35%" cy="35%" r="70%">
@@ -238,28 +169,19 @@ export default function ChatBot() {
         )}
       </button>
 
-<<<<<<< HEAD
       {/* Chat panel, only rendered when open */}
-=======
->>>>>>> old-hrm-project
       {open && (
         <div className="bot-panel">
           <div className="bot-header">
             <span>AI Attendance Assistant</span>
           </div>
-<<<<<<< HEAD
 
           {/* Message list */}
-=======
->>>>>>> old-hrm-project
           <div className="bot-body">
             {thread.map((m, i) => (
               <div key={i} className={`bot-msg bot-msg-${m.from}`}>{m.text}</div>
             ))}
-<<<<<<< HEAD
             {/* Typing indicator dots while waiting for AI response */}
-=======
->>>>>>> old-hrm-project
             {loading && (
               <div className="bot-msg bot-msg-bot bot-msg-typing">
                 <span className="bot-typing-dot" />
@@ -267,26 +189,18 @@ export default function ChatBot() {
                 <span className="bot-typing-dot" />
               </div>
             )}
-<<<<<<< HEAD
             {/* Anchor for auto-scroll */}
             <div ref={bottomRef} />
           </div>
 
           {/* Quick-reply buttons for common employee questions */}
-=======
-            <div ref={bottomRef} />
-          </div>
->>>>>>> old-hrm-project
           <div className="bot-quick-replies">
             {QUICK_REPLIES.map((q) => (
               <button key={q} type="button" className="bot-quick-btn" onClick={() => send(q)} disabled={loading}>{q}</button>
             ))}
           </div>
-<<<<<<< HEAD
 
           {/* Text input form for custom questions */}
-=======
->>>>>>> old-hrm-project
           <form className="bot-input-row" onSubmit={handleSubmit}>
             <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask me anything..." disabled={loading} />
             <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? '...' : 'Send'}</button>
@@ -295,8 +209,4 @@ export default function ChatBot() {
       )}
     </>
   )
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> old-hrm-project

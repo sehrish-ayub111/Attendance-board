@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 // Generic reusable modal component — centered popup card with a title,
 // close ("×") button, and a content area (children) for whatever form/content
 // is passed in. Used throughout the app (Edit Attendance, Employee Profile, etc.)
-=======
->>>>>>> old-hrm-project
 export default function Modal({ title, onClose, children }) {
   return (
     <div
@@ -12,7 +9,6 @@ export default function Modal({ title, onClose, children }) {
         borderRadius: 14,
         padding: 24,
         width: '100%',
-<<<<<<< HEAD
         maxWidth: 380, // caps width on larger screens
         maxHeight: '90vh', // prevents modal from exceeding viewport height
         overflowY: 'auto', // scrolls internally if content is too tall
@@ -28,20 +24,6 @@ export default function Modal({ title, onClose, children }) {
       }}
     >
       {/* Header row: title on the left, close button on the right */}
-=======
-        maxWidth: 380,
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-        boxSizing: 'border-box',
-        position: 'absolute', 
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 1000,
-      }}
-    >
->>>>>>> old-hrm-project
       <div
         style={{
           display: 'flex',
@@ -68,7 +50,6 @@ export default function Modal({ title, onClose, children }) {
           ×
         </button>
       </div>
-<<<<<<< HEAD
 
       {/* Content area — whatever is passed as children (form fields, text, etc.),
           laid out in a vertical stack with spacing between items */}
@@ -76,9 +57,3 @@ export default function Modal({ title, onClose, children }) {
     </div>
   )
 }
-=======
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>{children}</div>
-    </div>
-  )
-}
->>>>>>> old-hrm-project

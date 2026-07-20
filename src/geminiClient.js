@@ -1,15 +1,25 @@
-const GEMINI_API_KEY = 'AQ.Ab8RN6J_h_X7Hhr4csE5neBkSyByzQxtR1OQFNsgU-PP2IPeSA'
+// ⚠️ API key hardcoded directly in frontend source — see note below
+const GEMINI_API_KEY = 'AQ.Ab8RN6LdyYrrGByMVu5VroDbVj84bDDgqYTXRPHTuoKkq2M_Ow'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = 'gemini-3.5-flash'
 
+// Sends a question + data context to Gemini and returns the AI's text reply.
+// Used by both ChatBot.jsx (employee) and AdminChatBot.jsx (admin) —
+// `context` is the big block of attendance/leave data built by buildContext(),
+// `question` is whatever the user typed or clicked as a quick-reply.
 export async function askGemini(context, question) {
+  // Debug log to verify the key is loaded correctly (doesn't print the full key)
   console.log('KEY LENGTH:', GEMINI_API_KEY.length, 'STARTS WITH:', GEMINI_API_KEY.slice(0, 5))
+
   if (!GEMINI_API_KEY || GEMINI_API_KEY === '') {
     throw new Error('API key not set. Add your key in the geminiClient.js file.')
   }
 
+  // Gemini's generateContent endpoint, with the API key passed as a query param
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
 
+  // Full prompt: the data context + the user's question + instructions on how
+  // to answer (stay on-topic, don't guess, match user's language/style)
   const prompt = `${context}
 
 User's question: "${question}"
@@ -21,7 +31,7 @@ Based on the data given above, give a direct, short, and correct answer (in the 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 500 },
+      generationConfig: { temperature: 0.3, maxOutputTokens: 500 }, // low temperature = more consistent/factual answers
     }),
   })
 
@@ -31,6 +41,7 @@ Based on the data given above, give a direct, short, and correct answer (in the 
   }
 
   const data = await res.json()
+  // Navigate Gemini's response structure to extract the actual generated text
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
   if (!text) {

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../AppContext'
 
-<<<<<<< HEAD
 // Generic reusable chat screen — used for both admin<->employee 1-on-1 chats.
 // chatId identifies the conversation, title/photo are the other person's display info,
 // onBack closes the chat, onTitleClick (optional) is used to open a profile modal
@@ -11,37 +10,21 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
   const bottomRef = useRef(null) // used to auto-scroll to the latest message
 
   // Get only messages belonging to this chat, sorted oldest to newest
-=======
-export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick }) {
-  const { currentUser, messages, sendMessage, markChatRead } = useApp()
-  const [text, setText] = useState('')
-  const bottomRef = useRef(null)
-
->>>>>>> old-hrm-project
   const thread = messages
     .filter((m) => m.chatId === chatId)
     .sort((a, b) => a.timestamp - b.timestamp)
 
-<<<<<<< HEAD
   // Mark this chat as read whenever it's opened or a new message arrives
-=======
->>>>>>> old-hrm-project
   useEffect(() => {
     if (chatId) markChatRead(chatId)
   }, [chatId, messages.length])
 
-<<<<<<< HEAD
   // Auto-scroll to the bottom whenever the number of messages changes
-=======
->>>>>>> old-hrm-project
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [thread.length])
 
-<<<<<<< HEAD
   // Send the typed message, then clear the input
-=======
->>>>>>> old-hrm-project
   async function handleSend(e) {
     e.preventDefault()
     const trimmed = text.trim()
@@ -52,14 +35,10 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
 
   return (
     <div className="wa-screen">
-<<<<<<< HEAD
 
       {/* Header: back button + other person's avatar/name.
           If onTitleClick is provided (e.g. admin viewing employee chat), 
           the identity becomes clickable to open a profile modal */}
-=======
-      
->>>>>>> old-hrm-project
       <div className="wa-header">
         <button className="wa-back-btn" onClick={onBack}>←</button>
         {onTitleClick ? (
@@ -68,11 +47,7 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
               {photo ? (
                 <img src={photo} alt={title} className="wa-avatar-img" />
               ) : (
-<<<<<<< HEAD
                 title?.[0]?.toUpperCase() // fallback: first letter of name if no photo
-=======
-                title?.[0]?.toUpperCase()
->>>>>>> old-hrm-project
               )}
             </div>
             <span className="wa-title">{title}</span>
@@ -91,7 +66,6 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
         )}
       </div>
 
-<<<<<<< HEAD
       {/* Message list body */}
       <div className="wa-body">
         {thread.length === 0 ? (
@@ -100,14 +74,6 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
         ) : (
           thread.map((m) => {
             // Determine if this message was sent by the current logged-in user (for bubble alignment/style)
-=======
-
-      <div className="wa-body">
-        {thread.length === 0 ? (
-          <p className="wa-empty">Koi message nahi — pehla message bhejein!</p>
-        ) : (
-          thread.map((m) => {
->>>>>>> old-hrm-project
             const mine = m.senderId === currentUser.id
             return (
               <div key={m.id} className={`wa-msg-row ${mine ? 'wa-mine' : 'wa-theirs'}`}>
@@ -118,18 +84,11 @@ export default function ChatScreen({ chatId, title, photo, onBack, onTitleClick 
             )
           })
         )}
-<<<<<<< HEAD
         {/* Invisible anchor for auto-scrolling to the latest message */}
         <div ref={bottomRef} />
       </div>
 
       {/* Message input form at the bottom */}
-=======
-        <div ref={bottomRef} />
-      </div>
-
-   
->>>>>>> old-hrm-project
       <form className="wa-footer" onSubmit={handleSend}>
         <input
           className="wa-input"

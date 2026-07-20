@@ -3,19 +3,6 @@ import { useApp } from '../AppContext'
 import Modal from './Modal'
 
 export default function AddEmployee() {
-<<<<<<< HEAD
-  // Shared app functions/data from context
-  const { addEmployee, deleteEmployee, users } = useApp()
-
-  const [showModal, setShowModal] = useState(false) // controls "Add Employee" modal
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [lastCreated, setLastCreated] = useState(null) // stores the just-created employee (to show credentials)
-
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null) // tracks which row is asking "are you sure?"
-
-  // Show delete confirmation for a specific user
-=======
   const { addEmployee, deleteEmployee, users } = useApp()
 
   const [showModal, setShowModal] = useState(false)
@@ -25,32 +12,19 @@ export default function AddEmployee() {
 
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 
->>>>>>> old-hrm-project
   function askDelete(user) {
     setDeleteConfirmId(user.id)
   }
 
-<<<<<<< HEAD
-  // Cancel delete confirmation
-=======
->>>>>>> old-hrm-project
   function cancelDelete() {
     setDeleteConfirmId(null)
   }
 
-<<<<<<< HEAD
-  // Actually delete the user after confirmation
-=======
->>>>>>> old-hrm-project
   async function confirmDelete(user) {
     await deleteEmployee(user.id)
     setDeleteConfirmId(null)
   }
 
-<<<<<<< HEAD
-  // Handle form submit -> create employee, show credentials, reset form
-=======
->>>>>>> old-hrm-project
   async function handleSubmit(e) {
     e.preventDefault()
     const newUser = await addEmployee({ name: name.trim(), email: email.trim() })
@@ -60,10 +34,6 @@ export default function AddEmployee() {
     setShowModal(false)
   }
 
-<<<<<<< HEAD
-  // Only show users with role "user" (not admins)
-=======
->>>>>>> old-hrm-project
   const employees = users.filter((u) => u.role === 'user')
 
   return (
@@ -75,10 +45,6 @@ export default function AddEmployee() {
         </button>
       </div>
 
-<<<<<<< HEAD
-      {/* Show generated username/password right after creating a new employee */}
-=======
->>>>>>> old-hrm-project
       {lastCreated && (
         <div className="credentials-box">
           <p><strong>Employee are create!</strong> </p>
@@ -109,10 +75,6 @@ export default function AddEmployee() {
                   <td className="mono">{u.username}</td>
                   <td className="mono">{u.password}</td>
                   <td>
-<<<<<<< HEAD
-                    {/* Show Yes/No confirm buttons only for the row being deleted */}
-=======
->>>>>>> old-hrm-project
                     {deleteConfirmId === u.id ? (
                       <span className="inline-confirm">
                         <span className="inline-confirm-text">Delete?</span>
@@ -136,10 +98,6 @@ export default function AddEmployee() {
         </div>
       )}
 
-<<<<<<< HEAD
-      {/* Modal form to add a new employee */}
-=======
->>>>>>> old-hrm-project
       {showModal && (
         <Modal title="Add Employee" onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit} className="attendance-form">
@@ -180,8 +138,4 @@ export default function AddEmployee() {
       )}
     </div>
   )
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> old-hrm-project
